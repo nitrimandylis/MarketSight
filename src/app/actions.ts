@@ -1,7 +1,7 @@
 'use server';
 
 import * as stockService from '@/services/stock-service';
-import type { Stock } from '@/lib/types';
+import type { Stock, HistoricalData, TimeSpan } from '@/lib/types';
 
 const INITIAL_WATCHLIST = ["AAPL", "GOOGL", "TSLA", "AMZN", "MSFT", "NVDA"];
 
@@ -16,7 +16,7 @@ export async function getInitialDashboardData() {
     }
 
     const selectedStock = watchlist[0];
-    const historicalData = await stockService.fetchHistoricalData(selectedStock.ticker);
+    const historicalData = await stockService.fetchHistoricalData(selectedStock.ticker, '1Y');
 
     return {
         watchlist,
@@ -25,10 +25,10 @@ export async function getInitialDashboardData() {
     };
 }
 
-export async function getStockDataForTicker(ticker: string) {
+export async function getStockDataForTicker(ticker: string, timeSpan: TimeSpan) {
     const [selectedStock, historicalData] = await Promise.all([
         stockService.fetchStockDetails(ticker),
-        stockService.fetchHistoricalData(ticker),
+        stockService.fetchHistoricalData(ticker, timeSpan),
     ]);
 
     if (!selectedStock) {
@@ -37,4 +37,9 @@ export async function getStockDataForTicker(ticker: string) {
     }
 
     return { selectedStock, historicalData };
+}
+
+export async function getHistoricalDataForTicker(ticker: string, timeSpan: TimeSpan) {
+    const historicalData = await stockService.fetchHistoricalData(ticker, timeSpan);
+    return { historicalData };
 }

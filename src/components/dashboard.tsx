@@ -3,8 +3,8 @@
 import { useState, useMemo, useEffect } from "react";
 import { DollarSign, AlertCircle } from "lucide-react";
 
-import type { Stock, HistoricalData } from "@/lib/types";
-import { getInitialDashboardData, getStockDataForTicker } from "@/app/actions";
+import type { Stock, HistoricalData, TimeSpan } from "@/lib/types";
+import { getInitialDashboardData, getStockDataForTicker, getHistoricalDataForTicker } from "@/app/actions";
 
 import { AIRecommender } from "@/components/ai-recommender";
 import { StockChart } from "@/components/stock-chart";
@@ -29,7 +29,9 @@ export function Dashboard() {
   const [historicalData, setHistoricalData] = useState<HistoricalData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSwitchingStock, setIsSwitchingStock] = useState(false);
+  const [isChartLoading, setIsChartLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedTimeSpan, setSelectedTimeSpan] = useState<TimeSpan>('1Y');
 
   useEffect(() => {
     async function loadInitialData() {
@@ -60,7 +62,7 @@ export function Dashboard() {
     try {
         setIsSwitchingStock(true);
         setSelectedStock(stock);
-        const data = await getStockDataForTicker(stock.ticker);
+        const data = await getStockDataForTicker(stock.ticker, selectedTimeSpan);
         if(data.selectedStock) {
           setSelectedStock(data.selectedStock);
           setHistoricalData(data.historicalData);
@@ -73,6 +75,21 @@ export function Dashboard() {
         setIsSwitchingStock(false);
     }
   };
+
+  const handleTimeSpanChange = async (timeSpan: TimeSpan) => {
+    if (!selectedStock || timeSpan === selectedTimeSpan) return;
+
+    try {
+        setIsChartLoading(true);
+        setSelectedTimeSpan(timeSpan);
+        const { historicalData: newHistoricalData } = await getHistoricalDataForTicker(selectedStock.ticker, timeSpan);
+        setHistoricalData(newHistoricalData);
+    } catch (e) {
+        console.error(e);
+    } finally {
+        setIsChartLoading(false);
+    }
+};
 
   const userStockTickers = useMemo(() => watchlist.map((s) => s.ticker), [watchlist]);
   
@@ -137,7 +154,13 @@ export function Dashboard() {
              selectedStock ? (
               <div className="p-4 md:p-6 space-y-6">
                 <section>
-                  <StockChart data={historicalData} stock={selectedStock} isLoading={isSwitchingStock} />
+                  <StockChart 
+                    data={historicalData} 
+                    stock={selectedStock} 
+                    isLoading={isSwitchingStock || isChartLoading} 
+                    selectedTimeSpan={selectedTimeSpan}
+                    onTimeSpanChange={handleTimeSpanChange}
+                  />
                 </section>
                 <section>
                   <StockDetails stock={selectedStock} isLoading={isSwitchingStock} />

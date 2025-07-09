@@ -21,17 +21,22 @@ import {
   ChartContainer,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { type HistoricalData, type Stock } from "@/lib/types";
+import { type HistoricalData, type Stock, type TimeSpan } from "@/lib/types";
 import { format } from "date-fns";
 import { Skeleton } from "./ui/skeleton";
+import { Button } from "./ui/button";
 
 interface StockChartProps {
   data: HistoricalData[];
   stock: Stock;
   isLoading?: boolean;
+  selectedTimeSpan: TimeSpan;
+  onTimeSpanChange: (timeSpan: TimeSpan) => void;
 }
 
-export function StockChart({ data, stock, isLoading = false }: StockChartProps) {
+const TIME_SPANS: TimeSpan[] = ['1D', '5D', '1M', '6M', 'YTD', '1Y', 'ALL'];
+
+export function StockChart({ data, stock, isLoading = false, selectedTimeSpan, onTimeSpanChange }: StockChartProps) {
   const [lastUpdated, setLastUpdated] = useState("");
 
   useEffect(() => {
@@ -57,7 +62,7 @@ export function StockChart({ data, stock, isLoading = false }: StockChartProps) 
                 <Skeleton className="h-4 w-40" />
             </CardHeader>
             <CardContent>
-                <Skeleton className="h-64 w-full" />
+                <Skeleton className="h-[272px] w-full" />
             </CardContent>
         </Card>
     );
@@ -66,12 +71,29 @@ export function StockChart({ data, stock, isLoading = false }: StockChartProps) 
   return (
     <Card className="shadow-lg">
       <CardHeader>
-        <CardTitle className="font-headline">Price History (90 Days)</CardTitle>
-        <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-bold tracking-tight">${stock.price.toFixed(2)}</span>
-            <span className={`text-sm font-semibold ${isUp ? 'text-success' : 'text-destructive'}`}>
-                {isUp ? '+' : ''}{stock.change.toFixed(2)} ({stock.changePercent.toFixed(2)}%)
-            </span>
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+            <div>
+                <CardTitle className="font-headline">Price History ({selectedTimeSpan})</CardTitle>
+                <div className="flex items-baseline gap-2">
+                    <span className="text-3xl font-bold tracking-tight">${stock.price.toFixed(2)}</span>
+                    <span className={`text-sm font-semibold ${isUp ? 'text-success' : 'text-destructive'}`}>
+                        {isUp ? '+' : ''}{stock.change.toFixed(2)} ({stock.changePercent.toFixed(2)}%)
+                    </span>
+                </div>
+            </div>
+            <div className="flex flex-wrap gap-1">
+                {TIME_SPANS.map(span => (
+                    <Button
+                        key={span}
+                        variant={selectedTimeSpan === span ? "secondary" : "ghost"}
+                        size="sm"
+                        onClick={() => onTimeSpanChange(span)}
+                        className="rounded-full"
+                    >
+                        {span}
+                    </Button>
+                ))}
+            </div>
         </div>
         <CardDescription>
           Last updated: {lastUpdated}
@@ -98,7 +120,12 @@ export function StockChart({ data, stock, isLoading = false }: StockChartProps) 
               <CartesianGrid vertical={false} strokeDasharray="3 3" />
               <XAxis
                 dataKey="date"
-                tickFormatter={(value) => format(new Date(value), "MMM d")}
+                tickFormatter={(value) => {
+                    if (selectedTimeSpan === '1D') {
+                      return format(new Date(value), "HH:mm");
+                    }
+                    return format(new Date(value), "MMM d");
+                }}
                 tickLine={false}
                 axisLine={false}
                 dy={10}

@@ -1,6 +1,7 @@
 'use server';
 
-import type { Stock, HistoricalData } from '@/lib/types';
+import type { Stock, HistoricalData, TimeSpan } from '@/lib/types';
+import { format } from 'date-fns';
 
 const API_KEY = process.env.FMP_API_KEY;
 const BASE_URL = 'https://financialmodelingprep.com/api/v3';
@@ -28,6 +29,11 @@ interface FmpKeyMetrics {
 }
 
 interface FmpHistorical {
+    date: string;
+    close: number;
+}
+
+interface FmpIntraday {
     date: string;
     close: number;
 }
@@ -74,12 +80,50 @@ export async function fetchStockDetails(ticker: string): Promise<Stock | null> {
   }
 }
 
-export async function fetchHistoricalData(ticker: string): Promise<HistoricalData[]> {
+export async function fetchHistoricalData(ticker: string, timeSpan: TimeSpan = '1Y'): Promise<HistoricalData[]> {
     if (!API_KEY || API_KEY === "YOUR_FINANCIAL_MODELING_PREP_API_KEY") return [];
     try {
-        const res = await fetch(`${BASE_URL}/historical-price-full/${ticker}?serietype=line&timeseries=90&apikey=${API_KEY}`);
+        if (timeSpan === '1D') {
+            const res = await fetch(`${BASE_URL}/historical-chart/15min/${ticker}?apikey=${API_KEY}`);
+            if (!res.ok) {
+                console.error(`Failed to fetch 1D historical data for ${ticker}: ${res.status}`);
+                return [];
+            }
+            const data: FmpIntraday[] = await res.json();
+            if (!data) return [];
+            return data.map(item => ({
+                date: item.date,
+                price: item.close,
+            })).reverse();
+        }
+        
+        let url = `${BASE_URL}/historical-price-full/${ticker}?serietype=line&apikey=${API_KEY}`;
+        const today = new Date();
+        
+        switch (timeSpan) {
+            case '5D':
+                url += '&timeseries=5';
+                break;
+            case '1M':
+                url += '&timeseries=30';
+                break;
+            case '6M':
+                 url += `&timeseries=182`;
+                break;
+            case 'YTD':
+                const yearStart = new Date(today.getFullYear(), 0, 1);
+                url += `&from=${format(yearStart, 'yyyy-MM-dd')}&to=${format(today, 'yyyy-MM-dd')}`;
+                break;
+            case '1Y':
+                 url += `&timeseries=365`;
+                 break;
+            case 'ALL':
+                 break;
+        }
+
+        const res = await fetch(url);
         if (!res.ok) {
-            console.error(`Failed to fetch historical data for ${ticker}: ${res.status}`);
+            console.error(`Failed to fetch historical data for ${ticker} with timespan ${timeSpan}: ${res.status}`);
             return [];
         }
 
@@ -93,7 +137,7 @@ export async function fetchHistoricalData(ticker: string): Promise<HistoricalDat
             price: item.close,
         })).reverse();
     } catch(error) {
-        console.error(`Error fetching historical data for ${ticker}:`, error);
+        console.error(`Error fetching historical data for ${ticker} with timespan ${timeSpan}:`, error);
         return [];
     }
 }

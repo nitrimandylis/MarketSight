@@ -16,4 +16,6 @@ export interface Stock {
     date: string;
     price: number;
   }
+
+  export type TimeSpan = '1D' | '5D' | '1M' | '6M' | 'YTD' | '1Y' | 'ALL';
   
