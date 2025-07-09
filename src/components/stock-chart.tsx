@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import {
   Area,
   AreaChart,
@@ -29,6 +30,13 @@ interface StockChartProps {
 }
 
 export function StockChart({ data, stock }: StockChartProps) {
+  const [lastUpdated, setLastUpdated] = useState("");
+
+  useEffect(() => {
+    // This runs only on the client, after the initial render, preventing a hydration mismatch.
+    setLastUpdated(new Date().toLocaleTimeString());
+  }, []);
+
   const isUp = stock.change > 0;
   const chartColor = isUp ? "hsl(var(--success))" : "hsl(var(--destructive))";
 
@@ -50,7 +58,7 @@ export function StockChart({ data, stock }: StockChartProps) {
             </span>
         </div>
         <CardDescription>
-          Last updated: {new Date().toLocaleTimeString()}
+          Last updated: {lastUpdated}
         </CardDescription>
       </CardHeader>
       <CardContent>

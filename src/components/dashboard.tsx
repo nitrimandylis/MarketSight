@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { DollarSign, LineChart, PanelLeft } from "lucide-react";
 
 import { MOCK_STOCKS, MOCK_HISTORICAL_DATA, type Stock, type HistoricalData } from "@/lib/mock-data";
@@ -22,13 +22,14 @@ import {
 export function Dashboard() {
   const [watchlist] = useState<Stock[]>(MOCK_STOCKS);
   const [selectedStock, setSelectedStock] = useState<Stock>(MOCK_STOCKS[0]);
-  const [historicalData, setHistoricalData] = useState<HistoricalData[]>(() =>
-    MOCK_HISTORICAL_DATA(new Date(), 90, selectedStock.price)
-  );
+  const [historicalData, setHistoricalData] = useState<HistoricalData[]>([]);
+
+  useEffect(() => {
+    setHistoricalData(MOCK_HISTORICAL_DATA(new Date(), 90, selectedStock.price));
+  }, [selectedStock]);
 
   const handleSelectStock = (stock: Stock) => {
     setSelectedStock(stock);
-    setHistoricalData(MOCK_HISTORICAL_DATA(new Date(), 90, stock.price));
   };
 
   const userStockTickers = useMemo(() => watchlist.map((s) => s.ticker), [watchlist]);
