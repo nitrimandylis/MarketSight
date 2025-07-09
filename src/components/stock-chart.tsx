@@ -21,21 +21,22 @@ import {
   ChartContainer,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { type HistoricalData, type Stock } from "@/lib/mock-data";
+import { type HistoricalData, type Stock } from "@/lib/types";
 import { format } from "date-fns";
+import { Skeleton } from "./ui/skeleton";
 
 interface StockChartProps {
   data: HistoricalData[];
   stock: Stock;
+  isLoading?: boolean;
 }
 
-export function StockChart({ data, stock }: StockChartProps) {
+export function StockChart({ data, stock, isLoading = false }: StockChartProps) {
   const [lastUpdated, setLastUpdated] = useState("");
 
   useEffect(() => {
-    // This runs only on the client, after the initial render, preventing a hydration mismatch.
     setLastUpdated(new Date().toLocaleTimeString());
-  }, []);
+  }, [data]);
 
   const isUp = stock.change > 0;
   const chartColor = isUp ? "hsl(var(--success))" : "hsl(var(--destructive))";
@@ -46,6 +47,21 @@ export function StockChart({ data, stock }: StockChartProps) {
       color: chartColor,
     },
   };
+
+  if (isLoading) {
+    return (
+        <Card className="shadow-lg">
+            <CardHeader>
+                <Skeleton className="h-7 w-48 mb-2" />
+                <Skeleton className="h-8 w-32 mb-1" />
+                <Skeleton className="h-4 w-40" />
+            </CardHeader>
+            <CardContent>
+                <Skeleton className="h-64 w-full" />
+            </CardContent>
+        </Card>
+    );
+  }
 
   return (
     <Card className="shadow-lg">
@@ -64,7 +80,7 @@ export function StockChart({ data, stock }: StockChartProps) {
       <CardContent>
         <ChartContainer config={chartConfig} className="h-64 w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={data}>
+            <AreaChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="fillPrice" x1="0" y1="0" x2="0" y2="1">
                   <stop
@@ -97,7 +113,7 @@ export function StockChart({ data, stock }: StockChartProps) {
                   strokeWidth: 2,
                   strokeDasharray: "3 3",
                 }}
-                content={<ChartTooltipContent indicator="line" />}
+                content={<ChartTooltipContent indicator="line" formatter={(value) => `$${(value as number).toFixed(2)}`}/>}
               />
               <Area
                 dataKey="price"

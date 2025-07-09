@@ -6,29 +6,52 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { type Stock } from "@/lib/mock-data";
-import { BarChart, Briefcase, Boxes, Gauge, Scale } from "lucide-react";
+import { type Stock } from "@/lib/types";
+import { BarChart, Briefcase, Boxes, Gauge, Scale, TrendingUp, TrendingDown } from "lucide-react";
+import { Skeleton } from "./ui/skeleton";
 
 interface StockDetailsProps {
   stock: Stock;
+  isLoading?: boolean;
 }
 
 const formatNumber = (num: number) => {
     if (num >= 1e12) return `${(num / 1e12).toFixed(2)}T`;
     if (num >= 1e9) return `${(num / 1e9).toFixed(2)}B`;
     if (num >= 1e6) return `${(num / 1e6).toFixed(2)}M`;
-    if (num >= 1e3) return `${(num / 1e3).toFixed(2)}K`;
-    return num.toString();
+    return num.toLocaleString();
 };
 
-export function StockDetails({ stock }: StockDetailsProps) {
+export function StockDetails({ stock, isLoading = false }: StockDetailsProps) {
+  
+  if (isLoading) {
+    return (
+        <div>
+            <h3 className="text-2xl font-headline font-bold mb-4">Key Statistics</h3>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                {[...Array(6)].map((_, i) => (
+                    <Card key={i} className="shadow-md">
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <Skeleton className="h-4 w-20" />
+                            <Skeleton className="h-4 w-4" />
+                        </CardHeader>
+                        <CardContent>
+                           <Skeleton className="h-7 w-24" />
+                        </CardContent>
+                    </Card>
+                ))}
+            </div>
+        </div>
+    );
+  }
+
   const details = [
     { label: "Market Cap", value: `$${formatNumber(stock.marketCap)}`, icon: Briefcase },
     { label: "Volume", value: formatNumber(stock.volume), icon: BarChart },
-    { label: "P/E Ratio", value: stock.peRatio.toFixed(2), icon: Scale },
-    { label: "52-Wk High", value: `$${stock.high52W.toFixed(2)}`, icon: Gauge },
-    { label: "52-Wk Low", value: `$${stock.low52W.toFixed(2)}`, icon: Gauge },
-    { label: "Dividend Yield", value: `${stock.dividendYield.toFixed(2)}%`, icon: Boxes },
+    { label: "P/E Ratio", value: stock.peRatio?.toFixed(2) ?? 'N/A', icon: Scale },
+    { label: "52-Wk High", value: `$${stock.high52W.toFixed(2)}`, icon: TrendingUp },
+    { label: "52-Wk Low", value: `$${stock.low52W.toFixed(2)}`, icon: TrendingDown },
+    { label: "Div Yield", value: stock.dividendYield ? `${(stock.dividendYield * 100).toFixed(2)}%` : 'N/A', icon: Boxes },
   ];
 
   return (
