@@ -131,7 +131,7 @@ export function SearchPage() {
                 {results.map((stock) => (
                   <TableRow key={stock.symbol}>
                     <TableCell className="font-medium">
-                      <Link href={`/dashboard?ticker=${stock.symbol}`} className="text-primary hover:underline">
+                      <Link href={`/?ticker=${stock.symbol}`} className="text-primary hover:underline">
                         {stock.symbol}
                       </Link>
                     </TableCell>

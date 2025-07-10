@@ -77,7 +77,7 @@ export function Dashboard() {
       }
     }
     loadInitialData();
-  }, [searchParams, error]);
+  }, [searchParams]);
 
   const handleSelectStock = async (stock: Stock) => {
     if (selectedStock?.ticker === stock.ticker) return;
@@ -144,19 +144,19 @@ export function Dashboard() {
     <SidebarProvider>
       <Sidebar>
         <SidebarHeader>
-          <Link href="/" className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
             <Button variant="ghost" size="icon" className="bg-primary/10 hover:bg-primary/20">
                 <DollarSign className="w-6 h-6 text-primary" />
             </Button>
             <h1 className="text-xl font-headline font-semibold">MarketSight</h1>
-          </Link>
+          </div>
         </SidebarHeader>
         <SidebarContent>
             <div className="p-2">
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <Link href="/dashboard" className="w-full">
-                            <SidebarMenuButton isActive={pathname.startsWith('/dashboard')}>
+                        <Link href="/" className="w-full">
+                            <SidebarMenuButton isActive={pathname === '/'}>
                                 <LayoutDashboard />
                                 Dashboard
                             </SidebarMenuButton>

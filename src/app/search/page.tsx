@@ -33,7 +33,7 @@ export default function SearchRoutePage() {
                     <div className="p-2">
                         <SidebarMenu>
                             <SidebarMenuItem>
-                                <Link href="/dashboard" className="w-full">
+                                <Link href="/" className="w-full">
                                     <SidebarMenuButton>
                                         <LayoutDashboard />
                                         Dashboard

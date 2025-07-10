@@ -17,7 +17,14 @@
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="2" y2="22"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
                     <h1>MarketSight</h1>
                 </div>
-                <a href="../" class="button primary-button">Launch App</a>
+                <div class="nav-links">
+                    <a href="#features">Features</a>
+                    <a href="#tech-stack">Technology</a>
+                    <a href="https://github.com/nitrimandylis/MarketSight" target="_blank" rel="noopener noreferrer" class="button github-button">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-4.3 1.4 -4.3-2.5 -6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg>
+                        GitHub
+                    </a>
+                </div>
             </nav>
         </div>
     </header>
@@ -26,9 +33,10 @@
         <section class="hero">
             <div class="container hero-container">
                 <div class="hero-text">
+                    <span class="tag">AI-Powered Stock Analysis</span>
                     <h2>Navigate the Markets with AI-Powered Clarity</h2>
-                    <p>MarketSight provides real-time stock data, advanced charting, and intelligent recommendations to help you invest smarter.</p>
-                    <a href="../dashboard" class="button primary-button large-button">Get Started for Free</a>
+                    <p>MarketSight is an open-source stock analysis platform providing real-time data, advanced charting, and intelligent recommendations powered by Google's Gemini through Genkit to help you invest smarter.</p>
+                    <a href="../" class="button primary-button large-button">Launch The App</a>
                 </div>
                 <div class="hero-image">
                     <img src="https://placehold.co/600x400.png" data-ai-hint="stock market app" alt="MarketSight App Screenshot">
@@ -39,7 +47,6 @@
         <section id="features" class="features">
             <div class="container">
                 <div class="section-header">
-                    <span class="tag">Key Features</span>
                     <h3>Everything You Need to Analyze the Market</h3>
                     <p>From real-time data to AI-driven insights, we've got you covered.</p>
                 </div>
@@ -49,36 +56,37 @@
                              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" x2="18" y1="20" y2="10"></line><line x1="12" x2="12" y1="20" y2="4"></line><line x1="6" x2="6" y1="20" y2="14"></line></svg>
                         </div>
                         <h4>Live Stock Data</h4>
-                        <p>Track stocks with up-to-the-minute price information and key financial metrics.</p>
+                        <p>Track stocks with up-to-the-minute price information and key financial metrics from the Financial Modeling Prep API.</p>
                     </div>
                     <div class="feature-card">
                         <div class="icon-container">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9a2 2 0 0 1-2 2H6l-4 4V4c0-1.1.9-2 2-2h8a2 2 0 0 1 2 2v5Z"></path><path d="M18 9h2a2 2 0 0 1 2 2v10l-4-4h-6a2 2 0 0 1-2-2v-2"></path></svg>
+                             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><path d="m10 10.5 2 2 2-2"></path><path d="m10 16.5 2-2 2 2"></path></svg>
                         </div>
                         <h4>AI Recommendations</h4>
-                        <p>Get intelligent stock suggestions based on your portfolio and market trends.</p>
+                        <p>Get intelligent stock suggestions based on your portfolio and market trends, powered by Google's Gemini models via Genkit.</p>
                     </div>
                     <div class="feature-card">
                         <div class="icon-container">
                             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="m19 9-5 5-4-4-3 3"></path></svg>
                         </div>
                         <h4>Advanced Charting</h4>
-                        <p>Visualize historical performance with interactive charts and multiple time-spans.</p>
+                        <p>Visualize historical performance with interactive charts and multiple time-spans (1D, 5D, 1M, 6M, YTD, 1Y, ALL).</p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <section class="tech-stack">
+        <section id="tech-stack" class="tech-stack">
             <div class="container">
                 <div class="section-header">
                      <span class="tag">Technology</span>
-                     <h3>Built with a Modern Stack</h3>
+                     <h3>Built with a Modern, Scalable Stack</h3>
                 </div>
                  <div class="tech-logos">
                     <span>Next.js</span>
                     <span>React</span>
                     <span>Tailwind CSS</span>
+                    <span>ShadCN UI</span>
                     <span>Genkit</span>
                     <span>TypeScript</span>
                  </div>
@@ -88,7 +96,8 @@
 
     <footer>
         <div class="container">
-            <p>&copy; 2024 MarketSight. All rights reserved.</p>
+            <p>&copy; 2024 MarketSight. Released under the MIT License.</p>
+             <a href="https://github.com/nitrimandylis/MarketSight">View Source on GitHub</a>
         </div>
     </footer>
 </body>
