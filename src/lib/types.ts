@@ -18,4 +18,12 @@ export interface Stock {
   }
 
   export type TimeSpan = '1D' | '5D' | '1M' | '6M' | 'YTD' | '1Y' | 'ALL';
+
+  export interface SearchResult {
+    symbol: string;
+    name: string;
+    currency: string;
+    stockExchange: string;
+    exchangeShortName: string;
+  }
   

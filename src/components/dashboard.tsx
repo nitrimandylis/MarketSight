@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { DollarSign, AlertCircle } from "lucide-react";
+import { DollarSign, AlertCircle, Search, LayoutDashboard } from "lucide-react";
+import Link from "next/link";
+import { usePathname, useSearchParams } from "next/navigation";
 
 import type { Stock, HistoricalData, TimeSpan } from "@/lib/types";
-import { getInitialDashboardData, getStockDataForTicker, getHistoricalDataForTicker } from "@/app/actions";
+import { getInitialDashboardData, getStockDataForTicker, getHistoricalDataForTicker, getDashboardForTicker } from "@/app/actions";
 
 import { AIRecommender } from "@/components/ai-recommender";
 import { StockChart } from "@/components/stock-chart";
@@ -21,6 +23,10 @@ import {
   SidebarContent,
   SidebarInset,
   SidebarTrigger,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+  SidebarSeparator,
 } from "@/components/ui/sidebar";
 
 export function Dashboard() {
@@ -33,13 +39,30 @@ export function Dashboard() {
   const [error, setError] = useState<string | null>(null);
   const [selectedTimeSpan, setSelectedTimeSpan] = useState<TimeSpan>('1Y');
 
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   useEffect(() => {
     async function loadInitialData() {
       try {
         setError(null);
         setIsLoading(true);
-        const data = await getInitialDashboardData();
-        if(data.watchlist.length === 0) {
+        
+        const ticker = searchParams.get('ticker');
+        let data;
+        if (ticker) {
+            data = await getDashboardForTicker(ticker);
+            if (!data) {
+                // redirect to a not found page or show an error.
+                setError(`Stock with ticker "${ticker}" not found.`);
+                // Fallback to initial dashboard
+                data = await getInitialDashboardData();
+            }
+        } else {
+            data = await getInitialDashboardData();
+        }
+
+        if(data.watchlist.length === 0 && !error) {
           setError("Could not fetch stock data. Please ensure your FMP_API_KEY is set correctly in the .env file.");
         } else {
           setWatchlist(data.watchlist);
@@ -54,7 +77,7 @@ export function Dashboard() {
       }
     }
     loadInitialData();
-  }, []);
+  }, [searchParams]);
 
   const handleSelectStock = async (stock: Stock) => {
     if (selectedStock?.ticker === stock.ticker) return;
@@ -129,6 +152,27 @@ export function Dashboard() {
           </div>
         </SidebarHeader>
         <SidebarContent>
+            <div className="p-2">
+                <SidebarMenu>
+                    <SidebarMenuItem>
+                        <Link href="/dashboard" className="w-full">
+                            <SidebarMenuButton isActive={pathname.startsWith('/dashboard')}>
+                                <LayoutDashboard />
+                                Dashboard
+                            </SidebarMenuButton>
+                        </Link>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                        <Link href="/search" className="w-full">
+                            <SidebarMenuButton isActive={pathname.startsWith('/search')}>
+                                <Search />
+                                Search
+                            </SidebarMenuButton>
+                        </Link>
+                    </SidebarMenuItem>
+                </SidebarMenu>
+            </div>
+          <SidebarSeparator />
           <Watchlist
             stocks={watchlist}
             onSelectStock={handleSelectStock}

@@ -1,6 +1,6 @@
 'use server';
 
-import type { Stock, HistoricalData, TimeSpan } from '@/lib/types';
+import type { Stock, HistoricalData, TimeSpan, SearchResult } from '@/lib/types';
 import { format, subDays, startOfYear } from 'date-fns';
 
 const API_KEY = process.env.FMP_API_KEY;
@@ -72,7 +72,7 @@ export async function fetchStockDetails(ticker: string): Promise<Stock | null> {
       peRatio: quote.pe,
       dividendYield: metrics?.dividendYieldTTM || null,
       high52W: quote.yearHigh,
-      low52W: quote.yearLow,
+      low52W: quote.low52W,
     };
   } catch (error) {
     console.error(`Error fetching stock details for ${ticker}:`, error);
@@ -100,33 +100,29 @@ export async function fetchHistoricalData(ticker: string, timeSpan: TimeSpan = '
         let url: string;
         const today = new Date();
         
+        const getUrlForTimespan = (from: Date, to: Date) => `${BASE_URL}/historical-price-full/${ticker}?from=${format(from, 'yyyy-MM-dd')}&to=${format(to, 'yyyy-MM-dd')}&apikey=${API_KEY}`;
+
         switch (timeSpan) {
             case '5D':
-                const fiveDaysAgo = subDays(today, 5);
-                url = `${BASE_URL}/historical-price-full/${ticker}?from=${format(fiveDaysAgo, 'yyyy-MM-dd')}&to=${format(today, 'yyyy-MM-dd')}&apikey=${API_KEY}`;
+                url = getUrlForTimespan(subDays(today, 5), today);
                 break;
             case '1M':
-                const oneMonthAgo = subDays(today, 30);
-                url = `${BASE_URL}/historical-price-full/${ticker}?from=${format(oneMonthAgo, 'yyyy-MM-dd')}&to=${format(today, 'yyyy-MM-dd')}&apikey=${API_KEY}`;
+                url = getUrlForTimespan(subDays(today, 30), today);
                 break;
             case '6M':
-                 const sixMonthsAgo = subDays(today, 182);
-                 url = `${BASE_URL}/historical-price-full/${ticker}?from=${format(sixMonthsAgo, 'yyyy-MM-dd')}&to=${format(today, 'yyyy-MM-dd')}&apikey=${API_KEY}`;
+                 url = getUrlForTimespan(subDays(today, 182), today);
                 break;
             case 'YTD':
-                const yearStart = startOfYear(today);
-                url = `${BASE_URL}/historical-price-full/${ticker}?from=${format(yearStart, 'yyyy-MM-dd')}&to=${format(today, 'yyyy-MM-dd')}&apikey=${API_KEY}`;
+                url = getUrlForTimespan(startOfYear(today), today);
                 break;
             case '1Y':
-                 const oneYearAgo = subDays(today, 365);
-                 url = `${BASE_URL}/historical-price-full/${ticker}?from=${format(oneYearAgo, 'yyyy-MM-dd')}&to=${format(today, 'yyyy-MM-dd')}&apikey=${API_KEY}`;
+                 url = getUrlForTimespan(subDays(today, 365), today);
                  break;
             case 'ALL':
                  url = `${BASE_URL}/historical-price-full/${ticker}?apikey=${API_KEY}`;
                  break;
             default:
-                 const defaultDate = subDays(today, 365);
-                 url = `${BASE_URL}/historical-price-full/${ticker}?from=${format(defaultDate, 'yyyy-MM-dd')}&to=${format(today, 'yyyy-MM-dd')}&apikey=${API_KEY}`;
+                 url = getUrlForTimespan(subDays(today, 365), today);
         }
 
         const res = await fetch(url);
@@ -152,6 +148,25 @@ export async function fetchHistoricalData(ticker: string, timeSpan: TimeSpan = '
         })).reverse();
     } catch(error) {
         console.error(`Error fetching historical data for ${ticker} with timespan ${timeSpan}:`, error);
+        return [];
+    }
+}
+
+export async function searchStocks(query: string): Promise<SearchResult[]> {
+    if (!API_KEY || API_KEY === "YOUR_FINANCIAL_MODELING_PREP_API_KEY" || !query) {
+        return [];
+    }
+    try {
+        const url = `${BASE_URL}/search-ticker?query=${query}&limit=10&apikey=${API_KEY}`;
+        const res = await fetch(url);
+        if (!res.ok) {
+            console.error(`Failed to search stocks for query "${query}": ${res.status}`);
+            return [];
+        }
+        const data: SearchResult[] = await res.json();
+        return data;
+    } catch (error) {
+        console.error(`Error searching stocks for query "${query}":`, error);
         return [];
     }
 }
