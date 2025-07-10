@@ -46,11 +46,11 @@ export function StockDetails({ stock, isLoading = false }: StockDetailsProps) {
   }
 
   const details = [
-    { label: "Market Cap", value: `$${formatNumber(stock.marketCap)}`, icon: Briefcase },
-    { label: "Volume", value: formatNumber(stock.volume), icon: BarChart },
+    { label: "Market Cap", value: stock.marketCap ? `$${formatNumber(stock.marketCap)}` : 'N/A', icon: Briefcase },
+    { label: "Volume", value: stock.volume ? formatNumber(stock.volume) : 'N/A', icon: BarChart },
     { label: "P/E Ratio", value: stock.peRatio?.toFixed(2) ?? 'N/A', icon: Scale },
-    { label: "52-Wk High", value: `$${stock.high52W.toFixed(2)}`, icon: TrendingUp },
-    { label: "52-Wk Low", value: `$${stock.low52W.toFixed(2)}`, icon: TrendingDown },
+    { label: "52-Wk High", value: stock.high52W ? `$${stock.high52W.toFixed(2)}` : 'N/A', icon: TrendingUp },
+    { label: "52-Wk Low", value: stock.low52W ? `$${stock.low52W.toFixed(2)}` : 'N/A', icon: TrendingDown },
     { label: "Div Yield", value: stock.dividendYield ? `${(stock.dividendYield * 100).toFixed(2)}%` : 'N/A', icon: Boxes },
   ];
 
