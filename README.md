@@ -2,7 +2,7 @@
 
 Welcome to MarketSight, an AI-powered stock analysis and recommendation platform designed to provide you with the tools and insights needed to make informed investment decisions. Built with a modern tech stack, MarketSight offers a seamless and intuitive user experience for tracking your favorite stocks.
 
-![MarketSight Dashboard](https://placehold.co/1200x600.png?text=MarketSight+App+Screenshot)
+![MarketSight Dashboard](./docs/marketsight.png)
 
 ## ✨ Core Features
 
@@ -38,8 +38,8 @@ Follow these steps to get a local copy of MarketSight up and running.
 
 1.  **Clone the repository:**
     ```bash
-    git clone <your-repository-url>
-    cd <repository-folder>
+    git clone https://github.com/nitrimandylis/MarketSight.git
+    cd MarketSight
     ```
 
 2.  **Install dependencies:**
@@ -86,8 +86,5 @@ Here is a brief overview of the key directories in the project:
 └── next.config.ts          # Next.js configuration
 ```
 
-## Deploying to GitHub Pages
-
-This project includes a landing page and can be configured for static export, making it suitable for deployment on services like GitHub Pages or Vercel.
-
-To generate a static build, you can modify your `next.config.ts` to include `output: 'export'` and then run `npm run build`. This will create an `out` folder that you can deploy as a static site.
+#### Notice
+This project was vibe-coded using Firebase Studio and Gemini.
