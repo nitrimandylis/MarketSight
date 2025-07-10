@@ -1,7 +1,7 @@
 'use server';
 
 import type { Stock, HistoricalData, TimeSpan } from '@/lib/types';
-import { format } from 'date-fns';
+import { format, subDays, startOfYear } from 'date-fns';
 
 const API_KEY = process.env.FMP_API_KEY;
 const BASE_URL = 'https://financialmodelingprep.com/api/v3';
@@ -97,28 +97,36 @@ export async function fetchHistoricalData(ticker: string, timeSpan: TimeSpan = '
             })).reverse();
         }
         
-        let url = `${BASE_URL}/historical-price-full/${ticker}?serietype=line&apikey=${API_KEY}`;
+        let url: string;
         const today = new Date();
         
         switch (timeSpan) {
             case '5D':
-                url += '&timeseries=5';
+                const fiveDaysAgo = subDays(today, 5);
+                url = `${BASE_URL}/historical-price-full/${ticker}?from=${format(fiveDaysAgo, 'yyyy-MM-dd')}&to=${format(today, 'yyyy-MM-dd')}&apikey=${API_KEY}`;
                 break;
             case '1M':
-                url += '&timeseries=30';
+                const oneMonthAgo = subDays(today, 30);
+                url = `${BASE_URL}/historical-price-full/${ticker}?from=${format(oneMonthAgo, 'yyyy-MM-dd')}&to=${format(today, 'yyyy-MM-dd')}&apikey=${API_KEY}`;
                 break;
             case '6M':
-                 url += `&timeseries=182`;
+                 const sixMonthsAgo = subDays(today, 182);
+                 url = `${BASE_URL}/historical-price-full/${ticker}?from=${format(sixMonthsAgo, 'yyyy-MM-dd')}&to=${format(today, 'yyyy-MM-dd')}&apikey=${API_KEY}`;
                 break;
             case 'YTD':
-                const yearStart = new Date(today.getFullYear(), 0, 1);
-                url += `&from=${format(yearStart, 'yyyy-MM-dd')}&to=${format(today, 'yyyy-MM-dd')}`;
+                const yearStart = startOfYear(today);
+                url = `${BASE_URL}/historical-price-full/${ticker}?from=${format(yearStart, 'yyyy-MM-dd')}&to=${format(today, 'yyyy-MM-dd')}&apikey=${API_KEY}`;
                 break;
             case '1Y':
-                 url += `&timeseries=365`;
+                 const oneYearAgo = subDays(today, 365);
+                 url = `${BASE_URL}/historical-price-full/${ticker}?from=${format(oneYearAgo, 'yyyy-MM-dd')}&to=${format(today, 'yyyy-MM-dd')}&apikey=${API_KEY}`;
                  break;
             case 'ALL':
+                 url = `${BASE_URL}/historical-price-full/${ticker}?apikey=${API_KEY}`;
                  break;
+            default:
+                 const defaultDate = subDays(today, 365);
+                 url = `${BASE_URL}/historical-price-full/${ticker}?from=${format(defaultDate, 'yyyy-MM-dd')}&to=${format(today, 'yyyy-MM-dd')}&apikey=${API_KEY}`;
         }
 
         const res = await fetch(url);
@@ -128,7 +136,13 @@ export async function fetchHistoricalData(ticker: string, timeSpan: TimeSpan = '
         }
 
         const data = await res.json();
+        
         if (!data.historical) {
+            // Handle cases where the API returns an empty object for a valid ticker but no data
+             if (data.symbol) {
+                 return [];
+             }
+            console.error(`Unexpected response format for ${ticker} with timespan ${timeSpan}:`, data);
             return [];
         }
 
