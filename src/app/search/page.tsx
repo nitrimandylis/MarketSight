@@ -12,7 +12,7 @@ import {
     SidebarSeparator,
   } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import { DollarSign, LayoutDashboard, Search } from "lucide-react";
+import { DollarSign, LayoutDashboard, Search, Grid } from "lucide-react";
 import Link from "next/link";
 import { ThemeToggle } from "@/components/theme-toggle";
 
@@ -34,6 +34,14 @@ export default function SearchRoutePage() {
                         <SidebarMenu>
                             <SidebarMenuItem>
                                 <Link href="/" className="w-full">
+                                    <SidebarMenuButton>
+                                        <Grid />
+                                        Explore
+                                    </SidebarMenuButton>
+                                </Link>
+                            </SidebarMenuItem>
+                            <SidebarMenuItem>
+                                <Link href="/dashboard" className="w-full">
                                     <SidebarMenuButton>
                                         <LayoutDashboard />
                                         Dashboard

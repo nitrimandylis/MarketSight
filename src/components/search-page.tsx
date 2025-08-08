@@ -8,6 +8,7 @@ import Link from "next/link";
 
 import { searchStocks } from "@/app/actions";
 import { type SearchResult } from "@/lib/types";
+import { useWatchlist } from "@/hooks/use-watchlist";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,7 +35,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Loader2, Search } from "lucide-react";
+import { Loader2, Search, Plus, Check } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
   query: z.string().min(1, "Please enter a search term."),
@@ -46,6 +48,8 @@ export function SearchPage() {
   const [isPending, startTransition] = useTransition();
   const [results, setResults] = useState<SearchResult[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const { watchlist, addStock, removeStock, isLoaded } = useWatchlist();
+  const { toast } = useToast();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -68,6 +72,20 @@ export function SearchPage() {
         console.error(e);
       }
     });
+  };
+
+  const handleToggleWatchlist = (ticker: string) => {
+    if (watchlist.includes(ticker)) {
+      removeStock(ticker);
+      toast({
+        description: `${ticker} removed from your watchlist.`,
+      });
+    } else {
+      addStock(ticker);
+      toast({
+        description: `${ticker} added to your watchlist.`,
+      });
+    }
   };
 
   return (
@@ -124,22 +142,35 @@ export function SearchPage() {
                   <TableHead>Symbol</TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead>Exchange</TableHead>
-                  <TableHead>Currency</TableHead>
+                  <TableHead>Action</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {results.map((stock) => (
-                  <TableRow key={stock.symbol}>
-                    <TableCell className="font-medium">
-                      <Link href={`/?ticker=${stock.symbol}`} className="text-primary hover:underline">
-                        {stock.symbol}
-                      </Link>
-                    </TableCell>
-                    <TableCell>{stock.name}</TableCell>
-                    <TableCell>{stock.stockExchange}</TableCell>
-                    <TableCell>{stock.currency}</TableCell>
-                  </TableRow>
-                ))}
+                {results.map((stock) => {
+                  const isInWatchlist = watchlist.includes(stock.symbol);
+                  return (
+                    <TableRow key={stock.symbol}>
+                      <TableCell className="font-medium">
+                        <Link href={`/dashboard?ticker=${stock.symbol}`} className="text-primary hover:underline">
+                          {stock.symbol}
+                        </Link>
+                      </TableCell>
+                      <TableCell>{stock.name}</TableCell>
+                      <TableCell>{stock.stockExchange}</TableCell>
+                      <TableCell>
+                        <Button 
+                          variant={isInWatchlist ? "secondary" : "outline"} 
+                          size="sm"
+                          onClick={() => handleToggleWatchlist(stock.symbol)}
+                          disabled={!isLoaded}
+                        >
+                           {isInWatchlist ? <Check /> : <Plus />}
+                          {isInWatchlist ? "In Watchlist" : "Add to Watchlist"}
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </CardContent>

@@ -4,6 +4,7 @@ import {ThemeProvider} from '@/components/providers/theme-provider';
 import {Toaster} from '@/components/ui/toaster';
 import { Inter, Space_Grotesk } from 'next/font/google';
 import { cn } from '@/lib/utils';
+import { WatchlistProvider } from '@/hooks/use-watchlist.tsx';
 
 export const metadata: Metadata = {
   title: 'MarketSight',
@@ -39,8 +40,10 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
-          <Toaster />
+          <WatchlistProvider>
+            {children}
+            <Toaster />
+          </WatchlistProvider>
         </ThemeProvider>
       </body>
     </html>

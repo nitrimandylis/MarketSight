@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { DollarSign, AlertCircle, Search, LayoutDashboard } from "lucide-react";
+import { DollarSign, AlertCircle, Search, LayoutDashboard, Grid } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 
 import type { Stock, HistoricalData, TimeSpan } from "@/lib/types";
 import { getInitialDashboardData, getStockDataForTicker, getHistoricalDataForTicker, getDashboardForTicker } from "@/app/actions";
+import { useWatchlist } from "@/hooks/use-watchlist";
 
 import { AIRecommender } from "@/components/ai-recommender";
 import { StockChart } from "@/components/stock-chart";
@@ -30,6 +31,7 @@ import {
 } from "@/components/ui/sidebar";
 
 export function Dashboard() {
+  const { watchlist: watchlistTickers, isLoaded: isWatchlistLoaded } = useWatchlist();
   const [watchlist, setWatchlist] = useState<Stock[]>([]);
   const [selectedStock, setSelectedStock] = useState<Stock | null>(null);
   const [historicalData, setHistoricalData] = useState<HistoricalData[]>([]);
@@ -44,6 +46,8 @@ export function Dashboard() {
 
   useEffect(() => {
     async function loadInitialData() {
+      if (!isWatchlistLoaded) return;
+
       try {
         setError(null);
         setIsLoading(true);
@@ -51,15 +55,15 @@ export function Dashboard() {
         const ticker = searchParams.get('ticker');
         let data;
         if (ticker) {
-            data = await getDashboardForTicker(ticker);
-            if (!data) {
-                // redirect to a not found page or show an error.
+            const result = await getDashboardForTicker(ticker, watchlistTickers);
+            if (!result) {
                 setError(`Stock with ticker "${ticker}" not found.`);
-                // Fallback to initial dashboard
-                data = await getInitialDashboardData();
+                data = await getInitialDashboardData(watchlistTickers);
+            } else {
+              data = result;
             }
         } else {
-            data = await getInitialDashboardData();
+            data = await getInitialDashboardData(watchlistTickers);
         }
 
         if(data.watchlist.length === 0 && !error) {
@@ -77,7 +81,7 @@ export function Dashboard() {
       }
     }
     loadInitialData();
-  }, [searchParams]);
+  }, [searchParams, isWatchlistLoaded, watchlistTickers]);
 
   const handleSelectStock = async (stock: Stock) => {
     if (selectedStock?.ticker === stock.ticker) return;
@@ -152,11 +156,19 @@ export function Dashboard() {
           </div>
         </SidebarHeader>
         <SidebarContent>
-            <div className="p-2">
+             <div className="p-2">
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <Link href="/" className="w-full">
                             <SidebarMenuButton isActive={pathname === '/'}>
+                                <Grid />
+                                Explore
+                            </SidebarMenuButton>
+                        </Link>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                        <Link href="/dashboard" className="w-full">
+                            <SidebarMenuButton isActive={pathname.startsWith('/dashboard')}>
                                 <LayoutDashboard />
                                 Dashboard
                             </SidebarMenuButton>
@@ -213,7 +225,7 @@ export function Dashboard() {
                   <AIRecommender userStocks={userStockTickers} />
                 </section>
               </div>
-            ) : null}
+            ) : <div className="p-6">No stocks in your watchlist. Add some from the search page!</div>}
           </main>
         </div>
       </SidebarInset>

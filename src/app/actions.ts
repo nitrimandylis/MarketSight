@@ -3,15 +3,22 @@
 import * as stockService from '@/services/stock-service';
 import type { Stock, HistoricalData, TimeSpan, SearchResult } from '@/lib/types';
 
+// This is now a fallback if localStorage is empty
 const INITIAL_WATCHLIST = ["AAPL", "GOOGL", "TSLA", "AMZN", "MSFT", "NVDA"];
 
-export async function getInitialDashboardData() {
-    const watchlistPromises = INITIAL_WATCHLIST.map(ticker => stockService.fetchStockDetails(ticker));
+export async function getWatchlistData(tickers: string[]): Promise<Stock[]> {
+    const watchlistPromises = tickers.map(ticker => stockService.fetchStockDetails(ticker));
     const watchlistResults = await Promise.all(watchlistPromises);
-    const watchlist = watchlistResults.filter(Boolean) as Stock[];
+    return watchlistResults.filter(Boolean) as Stock[];
+}
+
+
+export async function getInitialDashboardData(tickers: string[] | null) {
+    const targetWatchlist = tickers && tickers.length > 0 ? tickers : INITIAL_WATCHLIST;
+    
+    const watchlist = await getWatchlistData(targetWatchlist);
     
     if (watchlist.length === 0) {
-        // If API fails, return empty state. The UI will show an error message.
         return { watchlist: [], selectedStock: null, historicalData: [] };
     }
 
@@ -32,7 +39,6 @@ export async function getStockDataForTicker(ticker: string, timeSpan: TimeSpan) 
     ]);
 
     if (!selectedStock) {
-        // Handle case where a single stock fetch fails
         return { selectedStock: null, historicalData: [] };
     }
 
@@ -50,18 +56,28 @@ export async function searchStocks(query: string): Promise<SearchResult[]> {
     return results;
 }
 
-export async function getDashboardForTicker(ticker: string) {
+export async function getDashboardForTicker(ticker: string, currentWatchlist: string[] | null) {
     const stock = await stockService.fetchStockDetails(ticker);
     if (!stock) {
         return null;
     }
-    // Since we don't have a watchlist, we'll create one with just this stock
-    const watchlist = [stock];
+
+    let watchlistTickers = currentWatchlist || INITIAL_WATCHLIST;
+    if (!watchlistTickers.includes(ticker)) {
+        watchlistTickers = [ticker, ...watchlistTickers];
+    }
+    
+    const watchlist = await getWatchlistData(watchlistTickers);
     const historicalData = await stockService.fetchHistoricalData(ticker, '1Y');
 
     return {
         watchlist,
         selectedStock: stock,
-        historicalData
+        historicalData,
+        updatedWatchlist: watchlistTickers
     };
+}
+
+export async function getSP500Movers(): Promise<{ gainers: Stock[], losers: Stock[] }> {
+    return stockService.fetchSP500Movers();
 }
