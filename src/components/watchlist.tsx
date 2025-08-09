@@ -8,10 +8,14 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
+  SidebarMenuAction,
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "./ui/scroll-area";
 import { Skeleton } from "./ui/skeleton";
+import { useWatchlist } from "@/hooks/use-watchlist";
+import { X } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface WatchlistProps {
   stocks: Stock[];
@@ -21,7 +25,17 @@ interface WatchlistProps {
 }
 
 export function Watchlist({ stocks, selectedStock, onSelectStock, isLoading }: WatchlistProps) {
-  
+  const { removeStock } = useWatchlist();
+  const { toast } = useToast();
+
+  const handleRemoveStock = (e: React.MouseEvent, ticker: string, name: string) => {
+    e.stopPropagation(); // Prevent stock selection when removing
+    removeStock(ticker);
+    toast({
+        description: `${name} (${ticker}) has been removed from your watchlist.`,
+    });
+  }
+
   const WatchlistSkeleton = () => (
     <SidebarMenu>
       {[...Array(6)].map((_, i) => (
@@ -53,37 +67,41 @@ export function Watchlist({ stocks, selectedStock, onSelectStock, isLoading }: W
                 return (
                 <SidebarMenuItem key={stock.ticker}>
                     <SidebarMenuButton
-                    onClick={() => onSelectStock(stock)}
-                    isActive={selectedStock?.ticker === stock.ticker}
-                    className="h-14 justify-start"
-                    tooltip={stock.name}
+                      onClick={() => onSelectStock(stock)}
+                      isActive={selectedStock?.ticker === stock.ticker}
+                      className="h-14 justify-start"
+                      tooltip={stock.name}
                     >
-                    <Image
-                        src={`https://financialmodelingprep.com/image-stock/${stock.ticker}.png`}
-                        onError={(e) => { e.currentTarget.src = `https://placehold.co/32x32.png` }}
-                        data-ai-hint={`${stock.name} logo`}
-                        alt={`${stock.name} logo`}
-                        width={32}
-                        height={32}
-                        className="rounded-full bg-muted"
-                    />
-                    <div className="flex flex-col items-start">
-                        <span className="font-semibold">{stock.ticker}</span>
-                        <span className="text-xs text-muted-foreground">{stock.name}</span>
-                    </div>
-                    <div className="ml-auto flex flex-col items-end">
-                        <span className="font-semibold">${stock.price.toFixed(2)}</span>
-                        <span
-                        className={cn(
-                            "text-xs font-semibold",
-                            isUp ? "text-success" : "text-destructive"
-                        )}
-                        >
-                        {isUp ? "+" : ""}
-                        {stock.change.toFixed(2)} ({stock.changePercent.toFixed(2)}%)
-                        </span>
-                    </div>
+                      <Image
+                          src={`https://financialmodelingprep.com/image-stock/${stock.ticker}.png`}
+                          onError={(e) => { e.currentTarget.src = `https://placehold.co/32x32.png` }}
+                          data-ai-hint={`${stock.name} logo`}
+                          alt={`${stock.name} logo`}
+                          width={32}
+                          height={32}
+                          className="rounded-full bg-muted"
+                      />
+                      <div className="flex flex-col items-start">
+                          <span className="font-semibold">{stock.ticker}</span>
+                          <span className="text-xs text-muted-foreground">{stock.name}</span>
+                      </div>
+                      <div className="ml-auto flex flex-col items-end">
+                          <span className="font-semibold">${stock.price.toFixed(2)}</span>
+                          <span
+                          className={cn(
+                              "text-xs font-semibold",
+                              isUp ? "text-success" : "text-destructive"
+                          )}
+                          >
+                          {isUp ? "+" : ""}
+                          {stock.change.toFixed(2)} ({stock.changePercent.toFixed(2)}%)
+                          </span>
+                      </div>
                     </SidebarMenuButton>
+                    <SidebarMenuAction showOnHover={true} onClick={(e) => handleRemoveStock(e, stock.ticker, stock.name)}>
+                        <X/>
+                        <span className="sr-only">Remove {stock.name}</span>
+                    </SidebarMenuAction>
                 </SidebarMenuItem>
                 );
             })}

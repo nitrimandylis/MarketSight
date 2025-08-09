@@ -198,11 +198,21 @@ export async function fetchHistoricalData(ticker: string, timeSpan: TimeSpan = '
 export async function searchStocks(query: string): Promise<SearchResult[]> {
     if (!API_KEY || API_KEY === "YOUR_FINANCIAL_MODELING_PREP_API_KEY") {
         if (!query) return [];
-        return [
-            { symbol: query.toUpperCase(), name: `${query.toUpperCase()} Company`, currency: 'USD', stockExchange: 'NASDAQ', exchangeShortName: 'NASDAQ' },
-            { symbol: 'FAKE', name: 'Fake Stock Inc.', currency: 'USD', stockExchange: 'NASDAQ', exchangeShortName: 'NASDAQ' },
-            { symbol: 'PLCHLDR', name: 'Placeholder Industries', currency: 'USD', stockExchange: 'NYSE', exchangeShortName: 'NYSE' },
-        ];
+        const results: SearchResult[] = [];
+        const q = query.toLowerCase();
+
+        // Simulate finding by ticker
+        if (q.length <= 5) {
+            results.push({ symbol: q.toUpperCase(), name: `${q.toUpperCase()} Company`, currency: 'USD', stockExchange: 'NASDAQ', exchangeShortName: 'NASDAQ' });
+        }
+        
+        // Simulate finding by name
+        if (q.includes('apple')) results.push({ symbol: 'AAPL', name: 'Apple Inc.', currency: 'USD', stockExchange: 'NASDAQ', exchangeShortName: 'NASDAQ' });
+        if (q.includes('google')) results.push({ symbol: 'GOOGL', name: 'Alphabet Inc.', currency: 'USD', stockExchange: 'NASDAQ', exchangeShortName: 'NASDAQ' });
+        if (q.includes('microsoft')) results.push({ symbol: 'MSFT', name: 'Microsoft Corporation', currency: 'USD', stockExchange: 'NASDAQ', exchangeShortName: 'NASDAQ' });
+        if (q.includes('amazon')) results.push({ symbol: 'AMZN', name: 'Amazon.com, Inc.', currency: 'USD', stockExchange: 'NASDAQ', exchangeShortName: 'NASDAQ' });
+
+        return [...new Map(results.map(item => [item.symbol, item])).values()];
     }
     try {
         const url = `${BASE_URL}/search-ticker?query=${query}&limit=10&apikey=${API_KEY}`;
